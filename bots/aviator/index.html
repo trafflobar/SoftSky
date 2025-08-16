@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Aviator HackBot — Signal Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121936; --muted:#7f8db3; --text:#e8eeff; --accent:#66e6a3; --accent2:#8ad1ff; --warning:#ffcc66; --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1200px 800px at 80% -10%,rgba(138,209,255,.2),transparent),linear-gradient(180deg,#0b1020,#0b1020);color:var(--text)}
+    .wrap{max-width:980px;margin:32px auto;padding:0 16px}
+    .card{background:linear-gradient(180deg,#121936,#0d1330);border:1px solid rgba(255,255,255,.06);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.4);overflow:hidden}
+    header{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:12px;align-items:center}
+    header .logo{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg, var(--accent), var(--accent2));color:#081019;font-weight:800}
+    header h1{font-size:19px;margin:0}
+    header p{margin:0;color:var(--muted);font-size:13px}
+
+    /* back button styles */
+    .back-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.2);
+      color: var(--text);
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 8px;
+      transition: background .2s;
+    }
+    .back-btn:hover {
+      background: rgba(255,255,255,.1);
+    }
+
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;padding:16px}
+    @media (max-width:860px){.grid{grid-template-columns:1fr;gap:14px;padding:12px}}
+
+    .panel{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
+    .panel h2{margin:0 0 10px;font-size:15px}
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+    input[type="time"],input[type="number"],input[type="text"]{width:100%;background:#0b1024;border:1px solid rgba(255,255,255,.08);color:var(--text);padding:12px;border-radius:12px;font-size:16px;outline:none;-webkit-tap-highlight-color:transparent}
+    input:focus{border-color:var(--accent)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:560px){.row{grid-template-columns:1fr}}
+
+    button{appearance:none;border:0;background:linear-gradient(135deg,var(--accent),#10c080);color:#041015;padding:12px 16px;border-radius:12px;font-weight:800;letter-spacing:.2px;cursor:pointer;box-shadow:0 6px 20px rgba(16,192,128,.35);touch-action:manipulation}
+    button.secondary{background:transparent;color:var(--text);border:1px dashed rgba(255,255,255,.2);box-shadow:none}
+    .actions{display:flex;gap:12px;margin-top:14px}
+    @media (max-width:560px){.actions{flex-direction:column} .actions button{width:100%}}
+
+    .sys{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:#0a0f22;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;min-height:100px;max-height:220px;overflow:auto;color:#cfe3ff;font-size:13px;line-height:1.5}
+
+    .progress{height:10px;border-radius:999px;background:#0c1230;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s ease}
+
+    .signals{display:grid;gap:12px}
+    .sig{border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;background:rgba(255,255,255,.03)}
+    .sig h3{margin:0 0 6px;font-size:15px}
+    .sig p{margin:4px 0;color:var(--muted)}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+    .safe{background:rgba(102,230,163,.15);color:#8bffca;border:1px solid rgba(102,230,163,.5)}
+    .risk{background:rgba(255,204,102,.15);color:#ffdf9a;border:1px solid rgba(255,204,102,.5)}
+
+    .footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+    .small{font-size:12px;color:var(--muted)}
+    .hint{color:#9fb6ff}
+    .copy{background:#121b3e;color:#dfe8ff;border:1px solid rgba(255,255,255,.12)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <button onclick="location.href='../../index.html'" class="back-btn">← Back</button>
+        <div class="logo">✈︎</div>
+        <div>
+          <h1>Aviator HackBot · Sky Soft</h1>
+          <p>Personalized timing + dual strategy • High sync • Analyst notes</p>
+        </div>
+      </header>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Aviator HackBot — Signal Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121936; --muted:#7f8db3; --text:#e8eeff; --accent:#66e6a3; --accent2:#8ad1ff; --warning:#ffcc66; --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1200px 800px at 80% -10%,rgba(138,209,255,.2),transparent),linear-gradient(180deg,#0b1020,#0b1020);color:var(--text)}
+    .wrap{max-width:980px;margin:32px auto;padding:0 16px}
+    .card{background:linear-gradient(180deg,#121936,#0d1330);border:1px solid rgba(255,255,255,.06);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.4);overflow:hidden}
+    header{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:12px;align-items:center}
+    header .logo{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg, var(--accent), var(--accent2));color:#081019;font-weight:800}
+    header h1{font-size:19px;margin:0}
+    header p{margin:0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;padding:16px}
+    @media (max-width:860px){.grid{grid-template-columns:1fr;gap:14px;padding:12px}}
+
+    .panel{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
+    .panel h2{margin:0 0 10px;font-size:15px}
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+    /* iOS zoom fix: keep >=16px */
+    input[type="time"],input[type="number"],input[type="text"]{width:100%;background:#0b1024;border:1px solid rgba(255,255,255,.08);color:var(--text);padding:12px;border-radius:12px;font-size:16px;outline:none;-webkit-tap-highlight-color:transparent}
+    input:focus{border-color:var(--accent)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:560px){.row{grid-template-columns:1fr}}
+
+    button{appearance:none;border:0;background:linear-gradient(135deg,var(--accent),#10c080);color:#041015;padding:12px 16px;border-radius:12px;font-weight:800;letter-spacing:.2px;cursor:pointer;box-shadow:0 6px 20px rgba(16,192,128,.35);touch-action:manipulation}
+    button.secondary{background:transparent;color:var(--text);border:1px dashed rgba(255,255,255,.2);box-shadow:none}
+    .actions{display:flex;gap:12px;margin-top:14px}
+    @media (max-width:560px){.actions{flex-direction:column} .actions button{width:100%}}
+
+    .sys{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:#0a0f22;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;min-height:100px;max-height:220px;overflow:auto;color:#cfe3ff;font-size:13px;line-height:1.5}
+
+    .progress{height:10px;border-radius:999px;background:#0c1230;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s ease}
+
+    .signals{display:grid;gap:12px}
+    .sig{border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;background:rgba(255,255,255,.03)}
+    .sig h3{margin:0 0 6px;font-size:15px}
+    .sig p{margin:4px 0;color:var(--muted)}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+    .safe{background:rgba(102,230,163,.15);color:#8bffca;border:1px solid rgba(102,230,163,.5)}
+    .risk{background:rgba(255,204,102,.15);color:#ffdf9a;border:1px solid rgba(255,204,102,.5)}
+
+    .footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+    .small{font-size:12px;color:var(--muted)}
+    .hint{color:#9fb6ff}
+    .copy{background:#121b3e;color:#dfe8ff;border:1px solid rgba(255,255,255,.12)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="logo">✈︎</div>
+        <div>
+          <h1>Aviator HackBot · Signal Lab</h1>
+          <p>Personalized timing + dual strategy • Simulated sync • Analyst notes</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <!-- Left: Inputs & System Log -->
+        <section class="panel">
+          <h2>1) Your next play</h2>
+          <div class="row">
+            <div>
+              <label for="time">Planned round time (HH:MM)</label>
+              <input id="time" type="time" required />
+            </div>
+            <div>
+              <label for="stake">Planned stake (LKR)</label>
+              <input id="stake" type="number" min="50" step="10" placeholder="e.g. 2400" />
+            </div>
+          </div>
+          <label for="note">Optional label</label>
+          <input id="note" type="text" placeholder="Morning session / Test run" />
+
+          <div class="actions">
+            <button id="generate">Generate Signal</button>
+            <button id="clear" class="secondary">Clear</button>
+          </div>
+
+          <h2 style="margin-top:14px">2) System sync</h2>
+          <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+          <div class="sys" id="syslog" aria-live="polite"></div>
+        </section>
+
+        <!-- Right: Output signals -->
+        <section class="panel">
+          <h2>3) Your signal package</h2>
+          <div class="signals" id="signals">
+            <div class="small">No signal yet. Enter your time and stake, then press <span class="hint">Generate Signal</span>.</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="footer">
+        <div>Safe mode aims for consistency. High‑Risk mode hunts spikes — use with discipline.</div>
+        <div>v0.1 prototype</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = sel => document.querySelector(sel);
+    const log = (msg)=>{ const box=$('#syslog'); box.innerHTML += msg + "\n"; box.scrollTop = box.scrollHeight; }
+
+    function seededRand(seed){
+      // xorshift-ish deterministic PRNG so signals feel consistent per input
+      let x = 1779033703 ^ seed.length;
+      for(let i=0;i<seed.length;i++) x = Math.imul(x ^ seed.charCodeAt(i), 3432918353) >>> 0;
+      x ^= x >>> 13; x = Math.imul(x, 3266489909) >>> 0; x ^= x >>> 16;
+      return ()=> (x = (x + 0x6D2B79F5) >>> 0, (x ^ (x>>>15)) / 2**32);
+    }
+
+    function formatTime(t){
+      if(!t) return ""; const [h,m] = t.split(':');
+      const hh = (""+h).padStart(2,'0'); const mm = (""+m).padStart(2,'0');
+      return `${hh}:${mm}`;
+    }
+
+    function makeSignals(){
+      const time = $('#time').value;
+      const stake = parseFloat($('#stake').value||"0");
+      const note  = $('#note').value.trim();
+      const key = `${time}|${stake}|${note}`;
+      const rnd = seededRand(key);
+
+      // derive mock values
+      const base = 1.35 + rnd()*0.35; // 1.35–1.70
+      const hi   = 2.1 + rnd()*1.4;   // 2.1–3.5
+      const confidence = 68 + Math.round(rnd()*22); // 68–90%
+      const windowMin  = (Math.floor(rnd()*40)+10); // 10–50 seconds
+
+      const analystPhrases = [
+        'Pattern rising, low‑vol window detected.',
+        'Short dip -> rebound expected; avoid early panic cashouts.',
+        'Volatility band narrowing — safer climb likely.',
+        'Spike probability present after :30s, watch closely.',
+        'Trend continuation favored; respect stop rules.'
+      ];
+      const noteIdx = Math.floor(rnd()*analystPhrases.length);
+
+      const safeExit = base.toFixed(2)+'x';
+      const riskExit = hi.toFixed(2)+'x';
+
+      $('#signals').innerHTML = `
+        <div class="sig">
+          <h3>Safe Mode <span class="badge safe">CONSISTENT</span></h3>
+          <p><b>Auto cash‑out:</b> ${safeExit}</p>
+          <p><b>Entry window:</b> next ${windowMin}s · <b>Confidence:</b> ${confidence}%</p>
+          <p class="small">Analyst: ${analystPhrases[noteIdx]}</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="SAFE ${safeExit} @ ${formatTime(time)}">Copy</button>
+          </div>
+        </div>
+        <div class="sig">
+          <h3>High‑Risk Mode <span class="badge risk">AGGRESSIVE</span></h3>
+          <p><b>Manual cash‑out target:</b> ${riskExit}</p>
+          <p><b>Entry window:</b> next ${Math.max(15, windowMin-5)}s · <b>Confidence:</b> ${(confidence-8)}%</p>
+          <p class="small">Analyst: ${analystPhrases[(noteIdx+2)%analystPhrases.length]}</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="HIGH‑RISK ${riskExit} @ ${formatTime(time)}">Copy</button>
+          </div>
+        </div>`;
+    }
+
+    function simulateSync(){
+      $('#syslog').textContent = '';
+      const bar = $('#bar');
+      bar.style.width = '0%';
+      const time = $('#time').value; const stake = $('#stake').value || '—';
+      log('> Connecting to server...');
+      let p = 0;
+      const steps = [
+        'Handshake OK',
+        'Fetching recent round history…',
+        'Retrieving encrypted Aviator data…',
+        `Calibrating for ${formatTime(time)} @ stake ${stake} LKR…`,
+        'Running volatility scan…',
+        'Compiling analyst note…',
+        'Signal package: READY'
+      ];
+      const timer = setInterval(()=>{
+        p += Math.random()*18+6;
+        if(p>=100){ p=100; clearInterval(timer); }
+        bar.style.width = p+'%';
+        if(steps.length) log('> '+steps.shift());
+        if(p===100){ makeSignals(); }
+      }, 450);
+    }
+
+    $('#generate').addEventListener('click', ()=>{
+      if(!$('#time').value){ alert('Please set your planned round time.'); return; }
+      simulateSync();
+    });
+    $('#clear').addEventListener('click', ()=>{
+      $('#time').value=''; $('#stake').value=''; $('#note').value='';
+      $('#syslog').textContent=''; $('#bar').style.width='0%';
+      $('#signals').innerHTML = '<div class="small">No signal yet. Enter your time and stake, then press <span class="hint">Generate Signal</span>.</div>';
+    });
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.copy');
+      if(!btn) return;
+      const t = btn.getAttribute('data-copy');
+      navigator.clipboard.writeText(t).then(()=>{
+        btn.textContent = 'Copied!';
+        setTimeout(()=>btn.textContent='Copy',1200);
+      });
+    });
+  </script>
+</body>
+</html>
