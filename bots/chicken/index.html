@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="theme-color" content="#0b1020"/>
+  <title>Chicken Road HackBot — SkySoft</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0b1020;--panel:#121936;--muted:#7f8db3;--text:#e8eeff;--accent:#66e6a3;--accent2:#8ad1ff;--warning:#ffcc66;--danger:#ff6b6b}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:
+      radial-gradient(1200px 800px at 80% -10%,rgba(138,209,255,.2),transparent),
+      linear-gradient(180deg,#0b1020,#0b1020);color:var(--text)}
+    .wrap{max-width:980px;margin:32px auto;padding:0 16px}
+    .card{background:linear-gradient(180deg,#121936,#0d1330);border:1px solid rgba(255,255,255,.06);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.4);overflow:hidden}
+
+    header{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:12px;align-items:center}
+    .logo{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#081019;font-weight:800}
+    header h1{font-size:19px;margin:0}
+    header p{margin:0;color:var(--muted);font-size:13px}
+    .back-btn{background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text);font-size:13px;padding:6px 10px;border-radius:8px;cursor:pointer;margin-right:8px;transition:background .2s}
+    .back-btn:hover{background:rgba(255,255,255,.1)}
+
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;padding:16px}
+    @media (max-width:860px){.grid{grid-template-columns:1fr;gap:14px;padding:12px}}
+
+    .panel{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
+    .panel h2{margin:0 0 10px;font-size:15px}
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+    input[type="time"],input[type="number"],select,input[type="text"]{
+      width:100%;background:#0b1024;border:1px solid rgba(255,255,255,.08);color:var(--text);padding:12px;border-radius:12px;font-size:16px;outline:none}
+    input:focus,select:focus{border-color:var(--accent)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:560px){.row{grid-template-columns:1fr}}
+
+    button{appearance:none;border:0;background:linear-gradient(135deg,var(--accent),#10c080);color:#041015;
+      padding:12px 16px;border-radius:12px;font-weight:800;letter-spacing:.2px;cursor:pointer;box-shadow:0 6px 20px rgba(16,192,128,.35)}
+    button.secondary{background:transparent;color:var(--text);border:1px dashed rgba(255,255,255,.2);box-shadow:none}
+    .actions{display:flex;gap:12px;margin-top:14px}
+    @media (max-width:560px){.actions{flex-direction:column} .actions button{width:100%}}
+
+    .sys{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0a0f22;border:1px solid rgba(255,255,255,.06);
+      border-radius:12px;padding:12px;min-height:110px;max-height:230px;overflow:auto;color:#cfe3ff;font-size:13px;line-height:1.5}
+
+    .progress{height:10px;border-radius:999px;background:#0c1230;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s ease}
+
+    .signals{display:grid;gap:12px}
+    .sig{border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;background:rgba(255,255,255,.03)}
+    .sig h3{margin:0 0 6px;font-size:15px}
+    .sig p{margin:4px 0;color:var(--muted)}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+    .safe{background:rgba(102,230,163,.15);color:#8bffca;border:1px solid rgba(102,230,163,.5)}
+    .risk{background:rgba(255,204,102,.15);color:#ffdf9a;border:1px solid rgba(255,204,102,.5)}
+    .coach{background:rgba(138,209,255,.15);color:#d8f0ff;border:1px solid rgba(138,209,255,.5)}
+    .copy{background:#121b3e;color:#dfe8ff;border:1px solid rgba(255,255,255,.12)}
+
+    /* Steps viz + targets */
+    .steps{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:10px}
+    .step{border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;text-align:center;background:#0b1024;color:#9fb6ff;font-weight:700;font-size:12px}
+    .targetA{background:rgba(102,230,163,.14);border-color:rgba(102,230,163,.5);color:#d6ffe9}
+    .targetB{background:rgba(255,204,102,.14);border-color:rgba(255,204,102,.5);color:#fff1c9}
+
+    /* Screens gallery */
+    details.gallery{margin-top:12px}
+    .shots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .shots figure{margin:0}
+    .shots img{width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.08)}
+    .shots figcaption{font-size:12px;color:#9fb6ff;margin-top:4px;text-align:center}
+    @media (max-width:760px){.shots{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <button onclick="location.href='../../index.html'" class="back-btn">← Back</button>
+        <div class="logo">🐔</div>
+        <div>
+          <h1>Chicken Road HackBot · SkySoft</h1>
+          <p>Lanes & steps • per‑step multipliers • safe & high‑risk cash‑outs</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <!-- Left -->
+        <section class="panel">
+          <h2>1) Setup</h2>
+          <div class="row">
+            <div>
+              <label for="time">Planned start (HH:MM)</label>
+              <input id="time" type="time" required/>
+            </div>
+            <div>
+              <label for="stake">Stake (LKR)</label>
+              <input id="stake" type="number" min="50" step="10" placeholder="e.g. 2400"/>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="difficulty">Difficulty</label>
+              <select id="difficulty">
+                <option value="easy" selected>Easy (exact multipliers)</option>
+                <option value="medium">Medium (approx)</option>
+                <option value="hard">Hard (approx)</option>
+              </select>
+            </div>
+            <div>
+              <label for="maxSteps">Steps to attempt</label>
+              <select id="maxSteps"></select>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="roi">Target ROI (optional, %)</label>
+              <input id="roi" type="number" min="10" step="5" placeholder="e.g. 50"/>
+            </div>
+            <div>
+              <label for="label">Optional label</label>
+              <input id="label" type="text" placeholder="Morning run / Test"/>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="generate">Generate Plan</button>
+            <button id="clear" class="secondary">Clear</button>
+          </div>
+
+          <h2 style="margin-top:14px">2) System sync</h2>
+          <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+          <div class="sys" id="syslog" aria-live="polite"></div>
+
+          <h2 style="margin-top:14px">3) Steps & Multipliers</h2>
+          <div id="steps" class="steps"></div>
+
+          <details class="gallery">
+            <summary style="cursor:pointer;color:#9fb6ff">Screens (Easy mode) — tap to open</summary>
+            <div class="shots" id="shots"></div>
+          </details>
+        </section>
+
+        <!-- Right -->
+        <section class="panel">
+          <h2>4) Strategy pack</h2>
+          <div class="signals" id="signals">
+            <div class="small">No plan yet. Set time/stake/difficulty/steps, then press <span class="hint">Generate Plan</span>.</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="footer">
+        <div>Each step can fail. Safe = early cash; High‑Risk = deeper step. Respect stop after 2 fails.</div>
+        <div>Chicken Road v0.2 (Easy multipliers embedded)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const log = m => { const box = $('#syslog'); box.innerHTML += m + "\\n"; box.scrollTop = box.scrollHeight; }
+
+    // Exact EASY multipliers from your screenshots (24 steps):
+    const EASY = [1.03,1.07,1.12,1.17,1.23,1.29,1.36,1.44,1.53,1.63,1.75,1.88,2.04,2.22,2.45,2.72,3.06,3.5,4.08,4.9,6.13,6.61,9.81,19.44];
+
+    // Approx curves for MEDIUM / HARD (можем позже заменить на реальные):
+    const MEDIUM = EASY.map((v,i)=> (i<6? v*0.98 : i<14? v*1.02 : v*1.06));
+    const HARD   = EASY.map((v,i)=> (i<6? v*1.0  : i<14? v*1.07 : v*1.15));
+
+    const SCREEN_URLS = [
+      ["https://s3.iimg.su/s/22/3gTV2WFQGlclztL4Lk5QJfG96QP8TyjJvTlePti0.jpg",1.03],
+      ["https://s3.iimg.su/s/22/ZwEcZXBP1EjcMoSTjcOVWNTLRvUXpkYlNfSw2Krv.jpg",1.07],
+      ["https://s3.iimg.su/s/22/9fiejg55NXPHqsFyrSIIICLfoMXY37zhNUUTyYbP.jpg",1.12],
+      ["https://s3.iimg.su/s/22/ZvhHDYjQGD7cG6TGRKP2aC3WQ7cs3x33zf65Vn4w.jpg",1.17],
+      ["https://s3.iimg.su/s/22/cUxx31GalClKPQvuE5dfWgP1qVIcJ2fRX3u0rW6D.jpg",1.23],
+      ["https://s3.iimg.su/s/22/PWoXRIb3T40yJYFRyGW5ob39RoJZqZvoNT9IDNef.jpg",1.29],
+      ["https://s3.iimg.su/s/22/yb6UpQitVFuxOl6zN15Dq6z3bA8CZCGYY5NpCAiU.jpg",1.36],
+      ["https://s3.iimg.su/s/22/1WhBfwR1MhLMQRbDGgiOWG6OV9GeCRfQKRa28bm8.jpg",1.44],
+      ["https://s3.iimg.su/s/22/1ByXQKjupQ9Fazx8w3AbGpMBdfUboEi2nWBfnZC0.jpg",1.53],
+      ["https://s3.iimg.su/s/22/R1qZRvZCorOgyhtYk9Aw9CtRi6ccIsEhzm9YDIp9.jpg",1.63],
+      ["https://s3.iimg.su/s/22/OjuCLxzKa5lh1rkkRgTYzefbcQMq8xl3TJMRFnoA.jpg",1.75],
+      ["https://s3.iimg.su/s/22/V2mcDDn0vUhkAxctQTm854MjOPTvjUbv9LMEegw5.jpg",1.88],
+      ["https://s3.iimg.su/s/22/EsZua2fEunL9op7NWeDTUDrbjekaIRJdNwskSJp4.jpg",2.04],
+      ["https://s3.iimg.su/s/22/xFpOq7K6rG9trRd9vXF3k5fAyjguclnnS3upTgw2.jpg",2.22],
+      ["https://s3.iimg.su/s/22/AjXpSUTObXZ8MTiirVcxPjpINsGl9Nl316rGiV1n.jpg",2.45],
+      ["https://s3.iimg.su/s/22/rlhQLFWVn8f0RnqfUeTDZy2KNTHecrb5tqMUvOwm.jpg",2.72],
+      ["https://s3.iimg.su/s/22/W9EWhdQw0cc3sJkxfATsRkqk8wB24dmvcABj6c8J.jpg",3.06],
+      ["https://s3.iimg.su/s/22/TTW6JVBEGxAkt4wh23S1hGogjQ06l0oIzFlE4upH.jpg",3.5],
+      ["https://s3.iimg.su/s/22/pWU0NDWqYRnyx9rQyEENmjiM8H30Evmr07P3GgYD.jpg",4.08],
+      ["https://s3.iimg.su/s/22/RP2tWnbRCIbyCsh14qKHicLrCLcpy4Yc1fv3UECQ.jpg",4.9],
+      ["https://s3.iimg.su/s/22/dXdnaxYfHzUzingmRFHS84R0B4XEj2zIw0RSy8UB.jpg",6.13],
+      ["https://s3.iimg.su/s/22/aHj2ojrjEPRAFY3GZEUCd7UNbyacvTuu7sxbh6zd.jpg",6.61],
+      ["https://s3.iimg.su/s/22/U99eXP7kY7YYaZiD8Om7SsPszSZ1sSENPVAA3gvB.jpg",9.81],
+      ["https://s3.iimg.su/s/22/xSCPtxgvzVnggvrKR2MLVJZAEGDgZuxZT3dH1QQi.png",19.44]
+    ];
+
+    function getCurve(diff){
+      if(diff==='medium') return MEDIUM;
+      if(diff==='hard') return HARD;
+      return EASY;
+    }
+
+    function seededRand(seed){
+      let x = 1779033703 ^ seed.length;
+      for(let i=0;i<seed.length;i++) x = Math.imul(x ^ seed.charCodeAt(i), 3432918353) >>> 0;
+      x ^= x >>> 13; x = Math.imul(x, 3266489909) >>> 0; x ^= x >>> 16;
+      return ()=> (x = (x + 0x6D2B79F5) >>> 0, (x ^ (x>>>15)) / 2**32);
+    }
+    const tfmt = t => { if(!t) return ''; const [h,m]=t.split(':'); return `${(''+h).padStart(2,'0')}:${(''+m).padStart(2,'0')}`; };
+
+    // populate steps dropdown and shots
+    const maxStepsSel = $('#maxSteps');
+    for(let i=1;i<=EASY.length;i++){
+      const o = document.createElement('option'); o.value=i; o.textContent=i; maxStepsSel.appendChild(o);
+    }
+    maxStepsSel.value = 6;
+
+    const shots = $('#shots');
+    SCREEN_URLS.forEach(([u,x],i)=>{
+      const fig = document.createElement('figure');
+      const img = document.createElement('img');
+      img.src = u; img.loading = 'lazy'; img.alt = `Step ${i+1} • ${x}x`;
+      const cap = document.createElement('figcaption');
+      cap.textContent = `Step ${i+1} • ${x}x`;
+      fig.appendChild(img); fig.appendChild(cap); shots.appendChild(fig);
+    });
+
+    function renderSteps(curve, safeIdx=-1, riskIdx=-1){
+      const box = $('#steps'); box.innerHTML='';
+      curve.forEach((m, i)=>{
+        const d = document.createElement('div');
+        d.className = 'step';
+        if(i===safeIdx) d.classList.add('targetA');
+        if(i===riskIdx) d.classList.add('targetB');
+        d.innerHTML = `#${i+1}<br><b>${m.toFixed(2)}x</b>`;
+        box.appendChild(d);
+      });
+    }
+    renderSteps(EASY);
+
+    function simulateSync(){
+      $('#syslog').textContent = '';
+      const bar = $('#bar'); bar.style.width = '0%';
+      const t = $('#time').value || '—';
+      const st = $('#stake').value || '—';
+      const diff = $('#difficulty').value;
+      const steps = $('#maxSteps').value;
+      log('> Connecting to Chicken Road engine…');
+      let p=0;
+      const flow = [
+        'Handshake OK',
+        'Loading per‑step multipliers…',
+        `Difficulty ${diff} · Steps ${steps} · Stake ${st}`,
+        'Estimating fail risk per step…',
+        'Analyst note compiled',
+        'Plan package: READY'
+      ];
+      const timer = setInterval(()=>{
+        p += Math.random()*18+6;
+        if(p>=100){ p=100; clearInterval(timer); }
+        bar.style.width = p+'%';
+        if(flow.length) log('> '+flow.shift());
+        if(p===100){ generatePlan(); }
+      }, 450);
+    }
+
+    function generatePlan(){
+      const time = $('#time').value;
+      const stake = parseFloat($('#stake').value||'0');
+      const diff = $('#difficulty').value;
+      const maxSteps = parseInt($('#maxSteps').value,10);
+      const roi = parseFloat($('#roi').value||'0');
+      const label = ($('#label').value||'').trim();
+      const curve = getCurve(diff).slice(0,maxSteps);
+      const rnd = seededRand(`${time}|${stake}|${diff}|${maxSteps}|${roi}|${label}`);
+
+      // simple hazard model: вероятность «сбить» растёт с шагом и сложностью
+      const baseRisk = diff==='easy'? 0.055 : diff==='medium'? 0.07 : 0.09;
+      const stepRisk = curve.map((_,i)=> Math.min(0.35, baseRisk + i*0.008 + (diff==='hard'? 0.004*i:0)));
+
+      // выбрать Safe target: ближайший к заданному ROI (или разумный ранний)
+      let safeIdx = 2; // по умолчанию шаг 3
+      if(roi>0){
+        const need = 1 + roi/100;
+        let best=1e9, idx=2;
+        curve.forEach((m,i)=>{ const d=Math.abs(m-need); if(d<best){best=d; idx=i;} });
+        safeIdx = Math.max(1, Math.min(idx, maxSteps-1));
+      } else {
+        // без ROI: подбираем ранний шаг с мультом ~1.2–1.6x (как «береги банк»)
+        for(let i=0;i<curve.length;i++){
+          if(curve[i]>=1.2 && curve[i]<=1.6){ safeIdx=i; break; }
+        }
+      }
+
+      // High‑risk target: сдвиг дальше (на +40–70% по номеру шага), но не дальше максимума
+      let riskIdx = Math.min(maxSteps-1, Math.max(safeIdx+1, Math.round(safeIdx * (1.5 + rnd()*0.2))));
+
+      // EV (очень грубо): EV = stake * (prod survival up to step) * multiplier
+      function survivalTo(idx){
+        let s = 1;
+        for(let i=0;i<=idx;i++) s *= (1 - stepRisk[i]); // риск на каждом шаге
+        return s;
+      }
+      const safeEV = stake * survivalTo(safeIdx) * curve[safeIdx];
+      const riskEV = stake * survivalTo(riskIdx) * curve[riskIdx];
+
+      // cadence по сложности
+      const cadence = diff==='easy'? 1200 : diff==='medium'? 950 : 800;
+
+      // analyst note
+      const notes = [
+        'Early cash protects session; restart sequence after any fail.',
+        'Edges spike later — don’t chase deep steps each run.',
+        'If first fail: cut stake by 30% and re‑sync.',
+        'Two fails in a row — pause 60s and reset plan.'
+      ];
+      const note = notes[Math.floor(rnd()*notes.length)];
+
+      // render steps with highlights
+      renderSteps(getCurve(diff), safeIdx, riskIdx);
+
+      // build output
+      const fmt = n => n.toLocaleString(undefined,{maximumFractionDigits:0});
+      $('#signals').innerHTML = `
+        <div class="sig">
+          <h3>Safe Route <span class="badge safe">CONSERVATIVE</span></h3>
+          <p><b>Cash‑out at step:</b> #${safeIdx+1} · <b>Multiplier:</b> ${curve[safeIdx].toFixed(2)}x</p>
+          <p><b>Survival prob:</b> ${(survivalTo(safeIdx)*100).toFixed(1)}% · <b>EV:</b> LKR ${fmt(safeEV)}</p>
+          <p><b>Cadence:</b> step every ${cadence}ms</p>
+          <p class="small">Analyst: ${note}</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="CHICKEN SAFE — step #${safeIdx+1} (${curve[safeIdx].toFixed(2)}x), cadence ${cadence}ms">Copy</button>
+          </div>
+        </div>
+
+        <div class="sig">
+          <h3>High‑Risk Dash <span class="badge risk">AGGRESSIVE</span></h3>
+          <p><b>Cash‑out at step:</b> #${riskIdx+1} · <b>Multiplier:</b> ${curve[riskIdx].toFixed(2)}x</p>
+          <p><b>Survival prob:</b> ${(survivalTo(riskIdx)*100).toFixed(1)}% · <b>EV:</b> LKR ${fmt(riskEV)}</p>
+          <p><b>Cadence:</b> ${Math.max(600, cadence-150)}ms · <b>Tip:</b> stop after first fail, re‑sync</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="CHICKEN HIGH — step #${riskIdx+1} (${curve[riskIdx].toFixed(2)}x), cadence ${Math.max(600, cadence-150)}ms">Copy</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // events
+    $('#generate').addEventListener('click', ()=>{
+      if(!$('#time').value){ alert('Please set your planned start time.'); return; }
+      simulateSync();
+    });
+    $('#clear').addEventListener('click', ()=>{
+      $('#time').value=''; $('#stake').value=''; $('#difficulty').value='easy'; $('#maxSteps').value='6'; $('#roi').value=''; $('#label').value='';
+      $('#syslog').textContent=''; $('#bar').style.width='0%';
+      $('#signals').innerHTML = '<div class="small">No plan yet. Set time/stake/difficulty/steps, then press <span class="hint">Generate Plan</span>.</div>';
+      renderSteps(getCurve('easy'));
+    });
+
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.copy');
+      if(!btn) return;
+      const t = btn.getAttribute('data-copy');
+      navigator.clipboard.writeText(t).then(()=>{
+        btn.textContent = 'Copied!';
+        setTimeout(()=>btn.textContent='Copy', 1200);
+      });
+    });
+  </script>
+</body>
+</html>
