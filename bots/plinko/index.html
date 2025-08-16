@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Plinko HackBot — Signal Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121936; --muted:#7f8db3; --text:#e8eeff; --accent:#66e6a3; --accent2:#8ad1ff; --warning:#ffcc66; --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:
+      radial-gradient(1200px 800px at 80% -10%,rgba(138,209,255,.2),transparent),
+      linear-gradient(180deg,#0b1020,#0b1020);color:var(--text)}
+    .wrap{max-width:980px;margin:32px auto;padding:0 16px}
+    .card{background:linear-gradient(180deg,#121936,#0d1330);border:1px solid rgba(255,255,255,.06);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.4);overflow:hidden}
+
+    header{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:12px;align-items:center}
+    .logo{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg, var(--accent), var(--accent2));color:#081019;font-weight:800}
+    header h1{font-size:19px;margin:0}
+    header p{margin:0;color:var(--muted);font-size:13px}
+    .back-btn{
+      background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text);
+      font-size:13px;padding:6px 10px;border-radius:8px;cursor:pointer;margin-right:8px;transition:background .2s;
+    }
+    .back-btn:hover{background:rgba(255,255,255,.1)}
+
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;padding:16px}
+    @media (max-width:860px){.grid{grid-template-columns:1fr;gap:14px;padding:12px}}
+
+    .panel{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
+    .panel h2{margin:0 0 10px;font-size:15px}
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+    input[type="time"],input[type="number"],select{
+      width:100%;background:#0b1024;border:1px solid rgba(255,255,255,.08);color:var(--text);
+      padding:12px;border-radius:12px;font-size:16px;outline:none;
+    }
+    input:focus,select:focus{border-color:var(--accent)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:560px){.row{grid-template-columns:1fr}}
+
+    button{
+      appearance:none;border:0;background:linear-gradient(135deg,var(--accent),#10c080);color:#041015;
+      padding:12px 16px;border-radius:12px;font-weight:800;letter-spacing:.2px;cursor:pointer;
+      box-shadow:0 6px 20px rgba(16,192,128,.35);touch-action:manipulation
+    }
+    button.secondary{background:transparent;color:var(--text);border:1px dashed rgba(255,255,255,.2);box-shadow:none}
+    .actions{display:flex;gap:12px;margin-top:14px}
+    @media (max-width:560px){.actions{flex-direction:column} .actions button{width:100%}}
+
+    .sys{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:#0a0f22;border:1px solid rgba(255,255,255,.06);
+      border-radius:12px;padding:12px;min-height:110px;max-height:230px;overflow:auto;color:#cfe3ff;font-size:13px;line-height:1.5}
+
+    .progress{height:10px;border-radius:999px;background:#0c1230;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s ease}
+
+    .signals{display:grid;gap:12px}
+    .sig{border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;background:rgba(255,255,255,.03)}
+    .sig h3{margin:0 0 6px;font-size:15px}
+    .sig p{margin:4px 0;color:var(--muted)}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+    .safe{background:rgba(102,230,163,.15);color:#8bffca;border:1px solid rgba(102,230,163,.5)}
+    .risk{background:rgba(255,204,102,.15);color:#ffdf9a;border:1px solid rgba(255,255,255,.5)}
+
+    /* Plinko heat row */
+    .heat{display:grid;grid-template-columns:repeat(16,1fr);gap:6px;margin-top:10px}
+    .slot{
+      height:16px;border-radius:8px;background:#0b1024;border:1px solid rgba(255,255,255,.08);
+      position:relative;overflow:hidden;
+    }
+    .slot .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .35s ease}
+    .slot.safe .fill{background:linear-gradient(90deg,#48e79d,#7be0ff)}
+    .slot.risk .fill{background:linear-gradient(90deg,#ffcc66,#ff9a66)}
+    .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)}
+    .legend span{display:inline-flex;align-items:center;gap:6px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.safe{background:#48e79d}
+    .dot.risk{background:#ffcc66}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <button onclick="location.href='../../index.html'" class="back-btn">← Back</button>
+        <div class="logo">🟢</div>
+        <div>
+          <h1>Plinko HackBot · SkySoft</h1>
+          <p>Risk lanes • rows control • cadence & targets • simulated sync</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <!-- Left: Inputs & System Log -->
+        <section class="panel">
+          <h2>1) Setup</h2>
+          <div class="row">
+            <div>
+              <label for="time">Planned start (HH:MM)</label>
+              <input id="time" type="time" required />
+            </div>
+            <div>
+              <label for="stake">Stake per ball (LKR)</label>
+              <input id="stake" type="number" min="20" step="10" placeholder="e.g. 100" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="risk">Risk level</label>
+              <select id="risk">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div>
+              <label for="rows">Rows</label>
+              <select id="rows">
+                <option>8</option>
+                <option>10</option>
+                <option>12</option>
+                <option selected>14</option>
+                <option>16</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="balls">Balls to drop</label>
+              <select id="balls">
+                <option>10</option>
+                <option selected>20</option>
+                <option>30</option>
+                <option>50</option>
+              </select>
+            </div>
+            <div>
+              <label for="label">Optional label</label>
+              <input id="label" type="text" placeholder="Morning set / Test" />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="generate">Generate Plan</button>
+            <button id="clear" class="secondary">Clear</button>
+          </div>
+
+          <h2 style="margin-top:14px">2) System sync</h2>
+          <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+          <div class="sys" id="syslog" aria-live="polite"></div>
+        </section>
+
+        <!-- Right: Output pack -->
+        <section class="panel">
+          <h2>3) Strategy pack</h2>
+          <div class="signals" id="signals">
+            <div class="small">No plan yet. Set time/stake/risk/rows, then press <span class="hint">Generate Plan</span>.</div>
+          </div>
+
+          <div class="legend">
+            <span><span class="dot safe"></span>Safe lane bias</span>
+            <span><span class="dot risk"></span>High‑risk lane bias</span>
+          </div>
+          <div class="heat" id="heat"></div>
+        </section>
+      </div>
+
+      <div class="footer">
+        <div>Cadence controls variance. Respect stop rules; avoid chasing.</div>
+        <div>Plinko v0.1 prototype</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const log = (m)=>{ const box=$('#syslog'); box.innerHTML += m + "\\n"; box.scrollTop = box.scrollHeight; };
+
+    // build heat slots (fixed 16 for visual consistency)
+    const heat = $('#heat');
+    for(let i=0;i<16;i++){
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      slot.dataset.idx = i;
+      const fill = document.createElement('div');
+      fill.className = 'fill';
+      slot.appendChild(fill);
+      heat.appendChild(slot);
+    }
+
+    function seededRand(seed){
+      let x = 1779033703 ^ seed.length;
+      for(let i=0;i<seed.length;i++) x = Math.imul(x ^ seed.charCodeAt(i), 3432918353) >>> 0;
+      x ^= x >>> 13; x = Math.imul(x, 3266489909) >>> 0; x ^= x >>> 16;
+      return ()=> (x = (x + 0x6D2B79F5) >>> 0, (x ^ (x>>>15)) / 2**32);
+    }
+    function tfmt(t){ if(!t) return ""; const [h,m]=t.split(':'); return `${(""+h).padStart(2,'0')}:${(""+m).padStart(2,'0')}`; }
+
+    function simulateSync(){
+      $('#syslog').textContent = '';
+      const bar = $('.bar'); bar.style.width = '0%';
+      const t = $('#time').value || '—';
+      const st = $('#stake').value || '—';
+      const r = $('#risk').value;
+      const rows = $('#rows').value;
+      const balls = $('#balls').value;
+      log('> Connecting to Plinko engine…');
+      let p = 0;
+      const steps = [
+        'Handshake OK',
+        'Fetching recent slot distribution…',
+        'Calibrating lane bias…',
+        `Rows ${rows} · Risk ${r} · Stake ${st} · Balls ${balls}`,
+        'Analyst note compiled',
+        'Plan package: READY'
+      ];
+      const timer = setInterval(()=>{
+        p += Math.random()*18+6;
+        if(p>=100){ p=100; clearInterval(timer); }
+        bar.style.width = p+'%';
+        if(steps.length) log('> '+steps.shift());
+        if(p===100){ generatePlan(); }
+      }, 450);
+    }
+
+    function generatePlan(){
+      const time = $('#time').value;
+      const stake = parseFloat($('#stake').value||'0');
+      const risk = $('#risk').value; // low / medium / high
+      const rows = parseInt($('#rows').value,10);
+      const balls = parseInt($('#balls').value,10);
+      const label = ($('#label').value||'').trim();
+      const key = `${time}|${stake}|${risk}|${rows}|${balls}|${label}`;
+      const rnd = seededRand(key);
+
+      // targets per risk (примерные целевые множители)
+      const targets = {
+        low:    { primary: [1.2,1.5,2.0], spike:[3,5] },
+        medium: { primary: [1.4,2.0,3.0], spike:[5,9] },
+        high:   { primary: [2.0,3.0,5.0], spike:[9,13] }
+      }[risk];
+
+      // lane bias (L/C/R) — распределение бросков
+      // делаем мягкий сдвиг от центра в зависимости от риска
+      const baseC = risk==='low' ? 0.5 : risk==='medium' ? 0.42 : 0.34;
+      const baseL = (1-baseC)/2;
+      const baseR = (1-baseC)/2;
+
+      // Cadence — ритм бросков
+      const cadence = risk==='low' ? 1200 : risk==='medium' ? 900 : 700; // мс между шариками
+      const bursts  = risk==='high' ? 3 : risk==='medium' ? 2 : 1;       // кол-во быстрых «очередей»
+
+      // Visual heat suggestions for 16 slots (0..15)
+      const weights = [];
+      for(let i=0;i<16;i++){
+        const centerBias = Math.exp(-Math.pow((i-7.5)/ (risk==='high'? 4.2 : risk==='medium'? 3.6 : 3.0),2));
+        const noise = 0.75 + rnd()*0.5;
+        weights.push(centerBias * noise);
+      }
+      // нормируем
+      const sum = weights.reduce((a,b)=>a+b,0);
+      const probs = weights.map(w=>w/sum);
+
+      // apply L/C/R bias
+      for(let i=0;i<16;i++){
+        const lane = i<5 ? 'L' : i>10 ? 'R' : 'C';
+        const mult = lane==='L'? (1+baseL*0.2) : lane==='R'? (1+baseR*0.2) : (1+baseC*0.2);
+        probs[i] *= mult;
+      }
+      // re‑normalize
+      const s2 = probs.reduce((a,b)=>a+b,0);
+      for(let i=0;i<16;i++) probs[i]/=s2;
+
+      // update heat
+      document.querySelectorAll('.slot').forEach((el,i)=>{
+        const f = el.querySelector('.fill');
+        const w = Math.max(4, Math.round(probs[i]*100)); // width %
+        f.style.width = w+'%';
+        el.classList.remove('safe','risk');
+        el.classList.add(risk==='high' ? 'risk':'safe');
+      });
+
+      // lane % as text
+      const leftP = Math.round(probs.slice(0,5).reduce((a,b)=>a+b,0)*100);
+      const midP  = Math.round(probs.slice(5,11).reduce((a,b)=>a+b,0)*100);
+      const rightP= Math.round(probs.slice(11).reduce((a,b)=>a+b,0)*100);
+
+      // build signals
+      $('#signals').innerHTML = `
+        <div class="sig">
+          <h3>Safe Mode <span class="badge safe">CONSISTENT</span></h3>
+          <p><b>Lane bias (L/C/R):</b> ${leftP}% / ${midP}% / ${rightP}%</p>
+          <p><b>Cadence:</b> drop every ${cadence}ms · batches: ${bursts}</p>
+          <p><b>Primary targets:</b> ${targets.primary.map(x=>x+'x').join(', ')}</p>
+          <p class="small">Note: favor center with ${rows} rows; stop after 2 red batches.</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="PLINKO SAFE — L/C/R ${leftP}/${midP}/${rightP} · cadence ${cadence}ms · targets ${targets.primary.join('x, ')}x">Copy</button>
+          </div>
+        </div>
+
+        <div class="sig">
+          <h3>High‑Risk Mode <span class="badge risk">AGGRESSIVE</span></h3>
+          <p><b>Spike targets:</b> ${targets.spike.map(x=>x+'x').join(' · ')}</p>
+          <p><b>Cadence:</b> ${Math.max(500,cadence-150)}ms · rapid bursts: ${bursts+1}</p>
+          <p><b>Tip:</b> stagger left/right every batch; center only on 3rd run.</p>
+          <p class="small">Respect stop after 1 heavy red; re‑sync next cycle.</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="PLINKO HIGH — spikes ${targets.spike.join('x, ')}x · cadence ${Math.max(500,cadence-150)}ms">Copy</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // events
+    $('#generate').addEventListener('click', ()=>{
+      if(!$('#time').value){ alert('Please set your planned start time.'); return; }
+      simulateSync();
+    });
+    $('#clear').addEventListener('click', ()=>{
+      $('#time').value=''; $('#stake').value=''; $('#risk').value='medium'; $('#rows').value='14'; $('#balls').value='20';
+      $('#syslog').textContent=''; $('.bar').style.width='0%';
+      $('#signals').innerHTML = '<div class="small">No plan yet. Set time/stake/risk/rows, then press <span class="hint">Generate Plan</span>.</div>';
+      document.querySelectorAll('.slot .fill').forEach(el=> el.style.width='0%');
+    });
+
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.copy');
+      if(!btn) return;
+      const t = btn.getAttribute('data-copy');
+      navigator.clipboard.writeText(t).then(()=>{
+        btn.textContent = 'Copied!';
+        setTimeout(()=>btn.textContent='Copy',1200);
+      });
+    });
+  </script>
+</body>
+</html>
