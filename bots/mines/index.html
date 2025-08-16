@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Mines HackBot — Signal Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121936; --muted:#7f8db3; --text:#e8eeff; --accent:#66e6a3; --accent2:#8ad1ff; --warning:#ffcc66; --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1200px 800px at 80% -10%,rgba(138,209,255,.2),transparent),linear-gradient(180deg,#0b1020,#0b1020);color:var(--text)}
+    .wrap{max-width:980px;margin:32px auto;padding:0 16px}
+    .card{background:linear-gradient(180deg,#121936,#0d1330);border:1px solid rgba(255,255,255,.06);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.4);overflow:hidden}
+
+    header{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:12px;align-items:center}
+    .logo{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg, var(--accent), var(--accent2));color:#081019;font-weight:800}
+    header h1{font-size:19px;margin:0}
+    header p{margin:0;color:var(--muted);font-size:13px}
+    .back-btn{
+      background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text);
+      font-size:13px;padding:6px 10px;border-radius:8px;cursor:pointer;margin-right:8px;transition:background .2s;
+    }
+    .back-btn:hover{background:rgba(255,255,255,.1)}
+
+    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;padding:16px}
+    @media (max-width:860px){.grid{grid-template-columns:1fr;gap:14px;padding:12px}}
+
+    .panel{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
+    .panel h2{margin:0 0 10px;font-size:15px}
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+    input[type="time"],input[type="number"],input[type="text"]{
+      width:100%;background:#0b1024;border:1px solid rgba(255,255,255,.08);color:var(--text);
+      padding:12px;border-radius:12px;font-size:16px;outline:none;-webkit-tap-highlight-color:transparent
+    }
+    select{
+      width:100%;background:#0b1024;border:1px solid rgba(255,255,255,.08);color:var(--text);
+      padding:12px;border-radius:12px;font-size:16px;outline:none;
+    }
+    input:focus,select:focus{border-color:var(--accent)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:560px){.row{grid-template-columns:1fr}}
+
+    button{
+      appearance:none;border:0;background:linear-gradient(135deg,var(--accent),#10c080);color:#041015;
+      padding:12px 16px;border-radius:12px;font-weight:800;letter-spacing:.2px;cursor:pointer;
+      box-shadow:0 6px 20px rgba(16,192,128,.35);touch-action:manipulation
+    }
+    button.secondary{background:transparent;color:var(--text);border:1px dashed rgba(255,255,255,.2);box-shadow:none}
+    .actions{display:flex;gap:12px;margin-top:14px}
+    @media (max-width:560px){.actions{flex-direction:column} .actions button{width:100%}}
+
+    .sys{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:#0a0f22;border:1px solid rgba(255,255,255,.06);
+      border-radius:12px;padding:12px;min-height:110px;max-height:230px;overflow:auto;color:#cfe3ff;font-size:13px;line-height:1.5}
+
+    .progress{height:10px;border-radius:999px;background:#0c1230;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s ease}
+
+    /* Mines board */
+    .board{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+    .cell{
+      aspect-ratio:1/1; border-radius:10px; display:grid; place-items:center;
+      background:#0b1024; border:1px solid rgba(255,255,255,.08); color:#a6b7e6; font-weight:700;
+      user-select:none; cursor:pointer; font-size:14px;
+      transition:transform .12s ease, background .2s ease, border-color .2s ease;
+    }
+    .cell:hover{transform:translateY(-1px)}
+    .safeCell{background:rgba(102,230,163,.12); border-color:rgba(102,230,163,.45); color:#c9ffe9}
+    .riskCell{background:rgba(255,204,102,.12); border-color:rgba(255,204,102,.45); color:#ffefc2}
+    .locked{pointer-events:none; opacity:.8}
+
+    .signals{display:grid;gap:12px;margin-top:10px}
+    .sig{border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;background:rgba(255,255,255,.03)}
+    .sig h3{margin:0 0 6px;font-size:15px}
+    .sig p{margin:4px 0;color:var(--muted)}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+    .safe{background:rgba(102,230,163,.15);color:#8bffca;border:1px solid rgba(102,230,163,.5)}
+    .risk{background:rgba(255,204,102,.15);color:#ffdf9a;border:1px solid rgba(255,204,102,.5)}
+
+    .footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+    .hint{color:#9fb6ff}
+    .small{font-size:12px;color:var(--muted)}
+    .copy{background:#121b3e;color:#dfe8ff;border:1px solid rgba(255,255,255,.12)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <button onclick="location.href='../../index.html'" class="back-btn">← Back</button>
+        <div class="logo">💣</div>
+        <div>
+          <h1>Mines HackBot · SkySoft</h1>
+          <p>5×5 board • Safe Path & High‑Risk patterns • Simulated sync • Analyst notes</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <!-- Left: Inputs, System, Board -->
+        <section class="panel">
+          <h2>1) Your next run</h2>
+          <div class="row">
+            <div>
+              <label for="time">Planned start (HH:MM)</label>
+              <input id="time" type="time" required />
+            </div>
+            <div>
+              <label for="stake">Stake (LKR)</label>
+              <input id="stake" type="number" min="50" step="10" placeholder="e.g. 2400" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="bombs">Bombs on board</label>
+              <select id="bombs">
+                <option value="1">1 bomb (easier)</option>
+                <option value="2">2 bombs</option>
+                <option value="3" selected>3 bombs (balanced)</option>
+                <option value="4">4 bombs</option>
+                <option value="5">5 bombs (harder)</option>
+              </select>
+            </div>
+            <div>
+              <label for="steps">Safe Path length</label>
+              <select id="steps">
+                <option value="3">3 tiles</option>
+                <option value="4">4 tiles</option>
+                <option value="5" selected>5 tiles</option>
+                <option value="6">6 tiles</option>
+                <option value="7">7 tiles</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="generate">Generate Pattern</button>
+            <button id="clear" class="secondary">Clear</button>
+          </div>
+
+          <h2 style="margin-top:14px">2) System sync</h2>
+          <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+          <div class="sys" id="syslog" aria-live="polite"></div>
+
+          <h2 style="margin-top:14px">3) Board (5×5)</h2>
+          <div class="board" id="board"></div>
+        </section>
+
+        <!-- Right: Output strategies -->
+        <section class="panel">
+          <h2>4) Your strategy pack</h2>
+          <div class="signals" id="signals">
+            <div class="small">No pattern yet. Set time/stake/bombs and press <span class="hint">Generate Pattern</span>.</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="footer">
+        <div>Safe Path = conservative line • High‑Risk = scattered picks; lock profits early.</div>
+        <div>Mines v0.1 prototype</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const log = (m)=>{ const box=$('#syslog'); box.innerHTML += m + "\\n"; box.scrollTop = box.scrollHeight; }
+
+    // build 5x5 cells once
+    const boardEl = $('#board');
+    const CELLS = 25;
+    let currentSafe = new Set();
+    let currentRisk = new Set();
+
+    function buildBoard(){
+      boardEl.innerHTML = '';
+      for(let i=0;i<CELLS;i++){
+        const c = document.createElement('div');
+        c.className = 'cell';
+        c.dataset.idx = i;
+        c.textContent = i+1;
+        c.addEventListener('click', ()=> c.classList.toggle('locked'));
+        boardEl.appendChild(c);
+      }
+    }
+    buildBoard();
+
+    function seededRand(seed){
+      let x = 1779033703 ^ seed.length;
+      for(let i=0;i<seed.length;i++) x = Math.imul(x ^ seed.charCodeAt(i), 3432918353) >>> 0;
+      x ^= x >>> 13; x = Math.imul(x, 3266489909) >>> 0; x ^= x >>> 16;
+      return ()=> (x = (x + 0x6D2B79F5) >>> 0, (x ^ (x>>>15)) / 2**32);
+    }
+    function tfmt(t){ if(!t) return ""; const [h,m]=t.split(':'); return `${(""+h).padStart(2,'0')}:${(""+m).padStart(2,'0')}`; }
+
+    function pickUnique(rnd, n, avoid=new Set()){
+      const picks = new Set();
+      while(picks.size<n){
+        const k = Math.floor(rnd()*CELLS);
+        if(!picks.has(k) && !avoid.has(k)) picks.add(k);
+      }
+      return picks;
+    }
+
+    function layPath(rnd, length){
+      // генерация "дорожки": старт с любой клетки, затем шаги рядом по кресту
+      const path = [];
+      let cur = Math.floor(rnd()*CELLS);
+      path.push(cur);
+      const dirs = [+1, -1, +5, -5]; // right, left, down, up (5 columns)
+      while(path.length < length){
+        const tries = [...dirs].sort(()=>rnd()-.5);
+        let moved = false;
+        for(const d of tries){
+          const next = cur + d;
+          // границы и переходы по строкам
+          if(next<0 || next>=CELLS) continue;
+          if(d===+1 && cur%5===4) continue;
+          if(d===-1 && cur%5===0) continue;
+          if(path.includes(next)) continue;
+          cur = next; path.push(cur); moved = true; break;
+        }
+        if(!moved){ // если застряли — телепорт в случайную новую клетку
+          cur = Math.floor(rnd()*CELLS);
+          if(!path.includes(cur)) path.push(cur);
+        }
+      }
+      return new Set(path);
+    }
+
+    function simulateSync(){
+      $('#syslog').textContent = '';
+      const bar = $('#bar'); bar.style.width = '0%';
+      const t = $('#time').value || '—';
+      const a = $('#stake').value || '—';
+      const b = $('#bombs').value;
+      log('> Connecting to Mines nodes…');
+      let p = 0;
+      const steps = [
+        'Handshake OK',
+        'Fetching last board signatures…',
+        'Decrypting volatility map…',
+        `Calibrating for ${tfmt(t)} · Stake ${a} · Bombs ${b}…`,
+        'Pathfinder module ready',
+        'Analyst note compiled',
+        'Pattern package: READY'
+      ];
+      const timer = setInterval(()=>{
+        p += Math.random()*18+6;
+        if(p>=100){ p=100; clearInterval(timer); }
+        bar.style.width = p+'%';
+        if(steps.length) log('> '+steps.shift());
+        if(p===100){ generatePatterns(); }
+      }, 450);
+    }
+
+    function generatePatterns(){
+      const t = $('#time').value;
+      const a = parseFloat($('#stake').value||"0");
+      const bombs = parseInt($('#bombs').value,10);
+      const steps = parseInt($('#steps').value,10);
+      const seedKey = `${t}|${a}|${bombs}|${steps}`;
+      const rnd = seededRand(seedKey);
+
+      // очистить подсветки
+      document.querySelectorAll('.cell').forEach(el=>{ el.classList.remove('safeCell','riskCell'); });
+
+      // Safe Path — дорожка нужной длины
+      currentSafe = layPath(rnd, steps);
+
+      // High-Risk pattern — разрозненные safe picks (не пересекаются с Safe Path)
+      const riskCount = Math.max(3, Math.min(8, Math.floor(steps/2)+2));
+      currentRisk = pickUnique(rnd, riskCount, currentSafe);
+
+      // Подсветить
+      currentSafe.forEach(i=>{ const el = boardEl.children[i]; if(el) el.classList.add('safeCell'); });
+      currentRisk.forEach(i=>{ const el = boardEl.children[i]; if(el) el.classList.add('riskCell'); });
+
+      // Оценки «уверенности» (имитация зависит от количества бомб)
+      const baseConf = 88 - bombs*6; // больше бомб — ниже уверенность
+      const safeConf = Math.max(52, Math.min(92, Math.round(baseConf - (steps-3))));
+      const riskConf = Math.max(38, Math.min(78, Math.round(baseConf - 10 + (steps>5? -4: +2))));
+
+      const analyst = [
+        'Prefer early cash after 2–3 safe tiles.',
+        'Board shows stable pockets; avoid center cluster first.',
+        'Edge bias detected — consider starting from corners.',
+        'If first pick misses, reduce risk next round.',
+        'Respect stop rule after 2 red tiles.'
+      ];
+      const note = analyst[Math.floor(rnd()*analyst.length)];
+
+      // Сформировать текстовые рекомендации
+      const listFmt = set => [...set].map(i=>i+1).join(', '); // 1-based indices
+
+      $('#signals').innerHTML = `
+        <div class="sig">
+          <h3>Safe Path <span class="badge safe">CONSERVATIVE</span></h3>
+          <p><b>Tiles sequence:</b> ${listFmt(currentSafe)}</p>
+          <p><b>Confidence:</b> ${safeConf}% · <b>Bombs:</b> ${bombs}</p>
+          <p class="small">Analyst: ${note}</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="MINES SAFE PATH: ${listFmt(currentSafe)}">Copy</button>
+          </div>
+        </div>
+
+        <div class="sig">
+          <h3>High‑Risk Pattern <span class="badge risk">AGGRESSIVE</span></h3>
+          <p><b>Suggested picks:</b> ${listFmt(currentRisk)}</p>
+          <p><b>Confidence:</b> ${riskConf}% · <b>Bombs:</b> ${bombs}</p>
+          <p class="small">Analyst: ${analyst[(Math.floor(Math.random()*analyst.length))]}</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="MINES HIGH‑RISK: ${listFmt(currentRisk)}">Copy</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Events
+    $('#generate').addEventListener('click', ()=>{
+      if(!$('#time').value){ alert('Please set your planned start time.'); return; }
+      simulateSync();
+    });
+    $('#clear').addEventListener('click', ()=>{
+      $('#time').value=''; $('#stake').value=''; $('#bombs').value='3'; $('#steps').value='5';
+      $('#syslog').textContent=''; $('#bar').style.width='0%';
+      $('#signals').innerHTML = '<div class="small">No pattern yet. Set time/stake/bombs and press <span class="hint">Generate Pattern</span>.</div>';
+      document.querySelectorAll('.cell').forEach(el=>{ el.classList.remove('safeCell','riskCell','locked'); });
+    });
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.copy');
+      if(!btn) return;
+      const t = btn.getAttribute('data-copy');
+      navigator.clipboard.writeText(t).then(()=>{
+        btn.textContent = 'Copied!';
+        setTimeout(()=>btn.textContent='Copy',1200);
+      });
+    });
+  </script>
+</body>
+</html>
