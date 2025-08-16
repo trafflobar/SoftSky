@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="theme-color" content="#0b1020"/>
+  <title>SoftSky — HackBots Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;800&display=swap" rel="stylesheet">
+  <style>
+  :root{
+    --bg:#0b1020; --panel:#121936; --text:#eaf1ff; --muted:#8ea0c6;
+    --stroke:rgba(255,255,255,.08); --cta:#ffd36b; --cta2:#ff8d4d;
+    --grad1:#66e6a3; --grad2:#8ad1ff;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; color:var(--text);
+    background:
+      radial-gradient(1100px 700px at 85% -10%,rgba(138,209,255,.14),transparent),
+      radial-gradient(900px 600px at 10% 120%,rgba(102,230,163,.10),transparent),
+      #0b1020;
+  }
+  a{color:inherit; text-decoration:none}
+
+  /* Больше нижнего места под sticky, чтобы ничего не перекрывалось */
+  .wrap{
+    max-width:1100px;
+    margin:24px auto calc(140px + env(safe-area-inset-bottom));
+    padding:0 16px;
+  }
+
+  /* HERO */
+  .notice{
+    background:linear-gradient(180deg,#10183b,#0e1433);
+    border:1px solid var(--stroke); border-radius:18px; padding:14px 14px;
+    display:flex; gap:12px; align-items:center; box-shadow:0 8px 36px rgba(0,0,0,.45)
+  }
+  .brand{
+    width:48px;height:48px;border-radius:14px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--grad1),var(--grad2)); color:#061a18; font-weight:900
+  }
+  .notice h1{margin:0; font-size:22px}
+  .notice p{margin:2px 0 0; color:var(--muted); font-size:13px}
+  .cta-row{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+  .btn{
+    appearance:none; border:1px solid var(--stroke); background:#121a3d; color:var(--text);
+    padding:10px 14px; border-radius:12px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:8px
+  }
+  .btn.primary{
+    background:linear-gradient(135deg,var(--cta),#ffea93); color:#0b0f1f; border:none;
+    box-shadow:0 8px 22px rgba(255,211,107,.25)
+  }
+  .btn.orange{
+    background:linear-gradient(135deg,var(--cta2),#ffb56b); color:#0b0f1f; border:none;
+    box-shadow:0 8px 22px rgba(255,141,77,.25)
+  }
+
+  .warning-bar{
+    margin-top:12px; padding:12px; border-radius:14px; border:1px dashed rgba(255,255,255,.25);
+    background:rgba(255,141,77,.14); color:#ffe3c9; font-weight:700; font-size:14px;
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap
+  }
+  .warning-bar a{background:#121a3d; padding:8px 12px; border-radius:10px; border:1px solid var(--stroke)}
+
+  /* GRID */
+  .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:16px}
+  @media (max-width:1024px){.grid{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:760px){ .grid{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:520px){ .grid{grid-template-columns:1fr} }
+
+  /* Карточки — выше, крупнее, с «иконкой» */
+  .card{
+    background:linear-gradient(180deg,#121936,#0e1430); border:1px solid var(--stroke); border-radius:18px;
+    padding:16px; display:flex; gap:12px; min-height:210px; position:relative; overflow:hidden
+  }
+  .card:hover{box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .logo{
+    width:64px; height:64px; border-radius:16px; display:block; object-fit:contain;
+    background:#0f142c; border:1px solid var(--stroke); padding:10px;
+    box-shadow:0 6px 20px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.05)
+  }
+  .title{font-size:16px; margin:0 0 4px}
+  .desc{font-size:13px; color:var(--muted); margin:0}
+  .meta{margin-top:auto; display:flex; gap:10px; align-items:center}
+  .open{
+    background:#131b3f; border:1px solid var(--stroke); padding:10px 14px; border-radius:12px; font-weight:800
+  }
+  .open:hover{background:#16224f}
+  .badge{font-size:11px; color:#a9b7e2}
+
+  /* sticky bottom CTA (mobile) — не перекрывает контент */
+  .sticky{
+    position:fixed; left:0; right:0; bottom:0;
+    background:linear-gradient(180deg,#0f1633,#0c1229);
+    border-top:1px solid var(--stroke); padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    display:none; gap:10px; z-index:40;
+    box-shadow:0 -10px 24px rgba(0,0,0,.45)
+  }
+  .sticky .btn{flex:1; justify-content:center; padding:12px}
+  @media (max-width:760px){ .sticky{display:flex} .cta-row{display:none} }
+</style>
+
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- HERO / NOTICE -->
+    <section class="notice">
+      <div class="brand">SS</div>
+      <div>
+        <h1>SoftSky — HackBots Hub</h1>
+        <p>Smart signal planners & strategy tools. Mobile‑first UI.</p>
+      </div>
+      <div class="cta-row">
+        <a class="btn primary" href="https://reffpa.com/L?tag=d_4611648m_97c__[]general[]_d173602_l213033_adaptive_banner&site=4611648&ad=97&r=registration" target="_blank">✅ Current official link</a>
+        <a class="btn" href="https://t.me/virat999bot" target="_blank">💬 Telegram</a>
+        <a class="btn orange" href="https://trafflobar.github.io/loansLK/" target="_blank">💰 Microloans</a>
+      </div>
+    </section>
+
+    <div class="warning-bar">
+      ⚠️ <span>Current official link works only here:</span>
+      <a href="https://reffpa.com/L?tag=d_4611648m_97c__[]general[]_d173602_l213033_adaptive_banner&site=4611648&ad=97&r=registration" target="_blank">https://reffpa.com/L?tag=d_3713491m_97c_&site=3713491&ad=97&r=registration</a>
+    </div>
+
+    <!-- GRID OF BOTS -->
+    <section class="grid">
+      <article class="card">
+        <img class="logo" src="https://raw.githubusercontent.com/trafflobar/SkySoft/refs/heads/main/assets/aviator.svg" alt="Aviator logo">
+        <h3 class="title">Aviator HackBot</h3>
+        <p class="desc">Personalized timing • dual strategy • analyst notes.</p>
+        <div class="meta">
+          <a class="open" href="bots/aviator/index.html">Open</a>
+          <span class="badge">v0.1</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <img class="logo" src="https://raw.githubusercontent.com/trafflobar/SkySoft/refs/heads/main/assets/jetx.svg" alt="JetX logo">
+        <h3 class="title">JetX HackBot</h3>
+        <p class="desc">Pace window • spike radar • conservative/high‑risk exits.</p>
+        <div class="meta">
+          <a class="open" href="bots/jetx/index.html">Open</a>
+          <span class="badge">v0.1</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <img class="logo" src="https://raw.githubusercontent.com/trafflobar/SkySoft/refs/heads/main/assets/crash.svg" alt="Crash logo">
+        <h3 class="title">Crash HackBot</h3>
+        <p class="desc">Risk profile • Heat meter • Streak analyzer • Stake split.</p>
+        <div class="meta">
+          <a class="open" href="bots/crash/index.html">Open</a>
+          <span class="badge">v0.1</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <img class="logo" src="https://raw.githubusercontent.com/trafflobar/SkySoft/refs/heads/main/assets/mines.svg" alt="Mines logo">
+        <h3 class="title">Mines HackBot</h3>
+        <p class="desc">5×5 grid planner • risk tiers • cash‑out map & EV.</p>
+        <div class="meta">
+          <a class="open" href="bots/mines/index.html">Open</a>
+          <span class="badge">v0.1</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <img class="logo" src="https://raw.githubusercontent.com/trafflobar/SkySoft/refs/heads/main/assets/plinko.svg" alt="Plinko logo">
+        <h3 class="title">Plinko HackBot</h3>
+        <p class="desc">Row depth • risk rail • funnel EV • pattern cadence.</p>
+        <div class="meta">
+          <a class="open" href="bots/plinko/index.html">Open</a>
+          <span class="badge">v0.1</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <img class="logo" src="https://raw.githubusercontent.com/trafflobar/SkySoft/refs/heads/main/assets/penalty.svg" alt="Penalty Unlimited logo">
+        <h3 class="title">Penalty Unlimited</h3>
+        <p class="desc">Goalie bias • corner matrix • session pacing & stops.</p>
+        <div class="meta">
+          <a class="open" href="bots/penalty/index.html">Open</a>
+          <span class="badge">v0.1</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <img class="logo" src="https://raw.githubusercontent.com/trafflobar/SkySoft/refs/heads/main/assets/chicken.svg" alt="Chicken Road logo">
+        <h3 class="title">Chicken Road</h3>
+        <p class="desc">Per‑step multipliers • safe/high‑risk routes • gallery.</p>
+        <div class="meta">
+          <a class="open" href="bots/chicken/index.html">Open</a>
+          <span class="badge">v0.2</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <img class="logo" src="https://raw.githubusercontent.com/trafflobar/SkySoft/refs/heads/main/assets/sweet.svg" alt="Sweet Bonanza logo">
+        <h3 class="title">Sweet Bonanza</h3>
+        <p class="desc">Spin ladder • bonus‑buy planner • Candy Heat coach.</p>
+        <div class="meta">
+          <a class="open" href="bots/sweet/index.html">Open</a>
+          <span class="badge">v0.1</span>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <!-- MOBILE sticky bar with key links -->
+  <div class="sticky">
+    <a class="btn primary" href="https://reffpa.com/L?tag=d_4611648m_97c__[]general[]_d173602_l213033_adaptive_banner&site=4611648&ad=97&r=registration" target="_blank">✅ Official link</a>
+    <a class="btn" href="https://t.me/virat999bot" target="_blank">💬 TG</a>
+    <a class="btn orange" href="https://trafflobar.github.io/loansLK/" target="_blank">💰 Loan</a>
+  </div>
+</body>
+</html>
