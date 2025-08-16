@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="theme-color" content="#1a0f24"/>
+  <title>SkySoft Sweet Bonanza HackBot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#1a0f24; --panel:#20132e; --muted:#9aa2be; --text:#f4eaff;
+      --accent:#ff87c1; --accent2:#ffcf6b; --good:#66e6a3; --warn:#ffcc66; --bad:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 15% -10%,rgba(255,135,193,.18),transparent),
+        radial-gradient(1100px 700px at 85% 110%,rgba(255,207,107,.12),transparent),
+        #1a0f24;
+    }
+    .wrap{max-width:980px;margin:32px auto;padding:0 16px}
+    .card{background:linear-gradient(180deg,#20132e,#170d24);border:1px solid rgba(255,255,255,.06);
+      border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.45);overflow:hidden}
+
+    header{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:12px;align-items:center}
+    .logo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a0f24;font-weight:800}
+    header h1{margin:0;font-size:19px}
+    header p{margin:0;color:var(--muted);font-size:13px}
+    .back-btn{background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text);
+      font-size:13px;padding:6px 10px;border-radius:8px;cursor:pointer;margin-right:8px}
+    .back-btn:hover{background:rgba(255,255,255,.08)}
+
+    .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;padding:16px}
+    @media (max-width:860px){.grid{grid-template-columns:1fr;gap:14px;padding:12px}}
+
+    .panel{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
+    .panel h2{margin:0 0 10px;font-size:15px}
+
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+    input[type="number"],input[type="time"],input[type="text"],textarea,select{
+      width:100%;background:#140c1f;border:1px solid rgba(255,255,255,.08);color:var(--text);
+      padding:12px;border-radius:12px;font-size:16px;outline:none}
+    textarea{min-height:78px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:560px){.row{grid-template-columns:1fr}}
+
+    button{appearance:none;border:0;background:linear-gradient(135deg,var(--accent),#ff7ab2);color:#120a18;
+      padding:12px 16px;border-radius:12px;font-weight:800;letter-spacing:.2px;cursor:pointer;
+      box-shadow:0 6px 20px rgba(255,135,193,.35)}
+    button.secondary{background:transparent;color:var(--text);border:1px dashed rgba(255,255,255,.2);box-shadow:none}
+    .actions{display:flex;gap:12px;margin-top:14px}
+    @media (max-width:560px){.actions{flex-direction:column} .actions button{width:100%}}
+
+    .sys{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#120a1a;border:1px solid rgba(255,255,255,.06);
+      border-radius:12px;padding:12px;min-height:110px;max-height:230px;overflow:auto;color:#ffeaff;font-size:13px;line-height:1.5}
+
+    .progress{height:10px;border-radius:999px;background:#1b1325;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s ease}
+
+    .signals{display:grid;gap:12px}
+    .sig{border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;background:rgba(255,255,255,.03)}
+    .sig h3{margin:0 0 6px;font-size:15px}
+    .sig p{margin:4px 0;color:var(--muted)}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+    .safe{background:rgba(102,230,163,.15);color:#8bffca;border:1px solid rgba(102,230,163,.5)}
+    .risk{background:rgba(255,204,102,.15);color:#ffdf9a;border:1px solid rgba(255,204,102,.5)}
+    .coach{background:rgba(255,135,193,.18);color:#ffe1f2;border:1px solid rgba(255,135,193,.5)}
+    .copy{background:#1c1430;color:#efeaff;border:1px solid rgba(255,255,255,.12)}
+
+    /* Candy Heat meter */
+    .heat{height:14px;border-radius:999px;background:#21142f;border:1px solid rgba(255,255,255,.06);overflow:hidden;position:relative}
+    .heat .fill{height:100%;width:20%;background:linear-gradient(90deg,#60e6a6,#ffd36b,#ff7ab2);transition:width .6s ease}
+    .heat .tick{position:absolute;inset:0;opacity:.18;background:
+      repeating-linear-gradient(90deg,transparent 0 12px,rgba(255,255,255,.4) 12px 13px)}
+
+    .small{font-size:12px;color:var(--muted)}
+    .hint{color:#c2c7ff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <button onclick="location.href='../../index.html'" class="back-btn">← Back</button>
+        <div class="logo">🍭</div>
+        <div>
+          <h1>SkySoft Sweet Bonanza HackBot</h1>
+          <p>Spin ladder • Bonus‑buy planner • Candy Heat • Tumble coach</p>
+        </div>
+      </header>
+
+      <div class="grid">
+        <!-- LEFT -->
+        <section class="panel">
+          <h2>1) Session setup</h2>
+          <div class="row">
+            <div>
+              <label for="bet">Base bet (LKR)</label>
+              <input id="bet" type="number" min="50" step="10" placeholder="e.g. 120"/>
+            </div>
+            <div>
+              <label for="bank">Session bank (LKR)</label>
+              <input id="bank" type="number" min="500" step="50" placeholder="e.g. 6000"/>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="spins">Spins per batch</label>
+              <select id="spins">
+                <option>25</option><option selected>50</option><option>75</option><option>100</option>
+              </select>
+            </div>
+            <div>
+              <label for="risk">Volatility mode</label>
+              <select id="risk">
+                <option value="low">Low (bank building)</option>
+                <option value="mid" selected>Balanced</option>
+                <option value="high">High (bonus hunting)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="buy">Bonus buy</label>
+              <select id="buy">
+                <option value="off" selected>Off (spins only)</option>
+                <option value="50">Buy 50× bet</option>
+                <option value="75">Buy 75× bet</option>
+                <option value="100">Buy 100× bet</option>
+              </select>
+            </div>
+            <div>
+              <label for="ladder">Bet ladder</label>
+              <select id="ladder">
+                <option value="flat" selected>Flat</option>
+                <option value="up">Step‑Up (after loss)</option>
+                <option value="pulse">Pulse (every 10 spins)</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="notes">Last outcomes (optional, comma/space separated, e.g. x2 x10 x0 x0 x5)</label>
+          <textarea id="notes" placeholder="x0 x0 x2 x4 x0 x10 x0 x3"></textarea>
+
+          <div class="actions">
+            <button id="generate">Generate Plan</button>
+            <button id="clear" class="secondary">Clear</button>
+          </div>
+
+          <h2 style="margin-top:14px">2) Sync & Candy Heat</h2>
+          <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+          <div class="sys" id="syslog" aria-live="polite"></div>
+          <div style="margin-top:10px">
+            <div class="small">Candy Heat (tumbles / multi chances)</div>
+            <div class="heat" aria-hidden="true"><div class="fill" id="heat"></div><div class="tick"></div></div>
+          </div>
+        </section>
+
+        <!-- RIGHT -->
+        <section class="panel">
+          <h2>3) Strategy package</h2>
+          <div class="signals" id="signals">
+            <div class="small">No plan yet. Fill the form and press <span class="hint">Generate Plan</span>.</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="footer" style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px">
+        <div>Stop after 2 red batches in a row. Re‑sync heat before any bonus buy.</div>
+        <div>Sweet Bonanza v0.1 — SkySoft</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const log = m => { const box = $('#syslog'); box.innerHTML += m + "\\n"; box.scrollTop = box.scrollHeight; };
+
+    function seededRand(seed){
+      let x = 1779033703 ^ seed.length;
+      for(let i=0;i<seed.length;i++) x = Math.imul(x ^ seed.charCodeAt(i), 3432918353) >>> 0;
+      x ^= x >>> 13; x = Math.imul(x, 3266489909) >>> 0; x ^= x >>> 16;
+      return ()=> (x = (x + 0x6D2B79F5) >>> 0, (x ^ (x>>>15)) / 2**32);
+    }
+
+    function parseHits(str){
+      const raw = (str||"").trim().split(/[\s,;]+/).map(s=>s.toLowerCase());
+      let high=0, mid=0, dead=0;
+      raw.forEach(t=>{
+        if(/^x?(10|12|15|20|25|\d{2,})$/.test(t)) high++;
+        else if(/^x?(2|3|4|5|6|7|8|9)$/.test(t)) mid++;
+        else dead++;
+      });
+      return {high,mid,dead,count:raw.filter(Boolean).length};
+    }
+
+    function simulateSync(){
+      $('#syslog').textContent=''; $('#bar').style.width='0%';
+      const steps = [
+        'Handshake OK',
+        'Reading last outcomes…',
+        'Estimating tumble density…',
+        'RTP window & volatility set…',
+        'Compiling ladder & bonus plan…',
+        'Package: READY'
+      ];
+      let p=0;
+      const timer = setInterval(()=>{
+        p += Math.random()*18+6; if(p>=100){p=100; clearInterval(timer);}
+        $('#bar').style.width = p+'%';
+        if(steps.length) log('> '+steps.shift());
+        if(p===100) buildPlan();
+      }, 450);
+    }
+
+    function buildPlan(){
+      const bet   = parseFloat($('#bet').value||'0');
+      const bank  = parseFloat($('#bank').value||'0');
+      const spins = parseInt($('#spins').value,10);
+      const risk  = $('#risk').value;
+      const buy   = $('#buy').value;      // "off" | 50 | 75 | 100
+      const ladder= $('#ladder').value;
+
+      const hits = parseHits($('#notes').value);
+      const rnd = seededRand(`${bet}|${bank}|${spins}|${risk}|${buy}|${ladder}|${hits.high},${hits.mid},${hits.dead}`);
+
+      // Heat based on recent highs/mids + randomness
+      let heat = 0.25 + (hits.high*0.12) + (hits.mid*0.05) + rnd()*0.25;
+      if(risk==='high') heat += 0.15;
+      if(risk==='low')  heat -= 0.08;
+      heat = Math.max(0.06, Math.min(0.95, heat));
+      $('#heat').style.width = Math.round(heat*100)+'%';
+
+      // Bet ladder preview
+      const base = bet || 100;
+      const ladderSeq = [];
+      for(let i=1;i<=spins;i++){
+        if(ladder==='flat') ladderSeq.push(base);
+        else if(ladder==='up') ladderSeq.push(i%5===0 ? Math.round(base*1.4) : base);
+        else if(ladder==='pulse') ladderSeq.push(i%10===0 ? Math.round(base*1.6) : (i%10===1? Math.round(base*0.9): base));
+      }
+      const ladderAvg = Math.round(ladderSeq.reduce((a,b)=>a+b,0)/ladderSeq.length);
+
+      // Bonus buy cadence (if enabled)
+      let bonusEvery = null;
+      if(buy!=='off'){
+        const mult = parseInt(buy,10);
+        bonusEvery = risk==='high' ? 2 : risk==='mid' ? 3 : 4;
+        if(heat<0.35) bonusEvery += 1;
+      }
+
+      // Win targets
+      const safeMulti = 1.6 + heat*0.6;      // 1.6–2.2x session ROI for spins
+      const highMulti = 3.0 + heat*3.0;      // 3–6x for bonus spikes
+      const targetSpinProfit = Math.round(ladderAvg * spins * (safeMulti-1));
+      const targetBonusProfit= buy==='off'? 0 : Math.round((base * parseInt(buy,10)) * (0.35 + heat));
+
+      // Bank safety
+      const stopLoss = Math.round(bank * (risk==='high'? 0.35 : risk==='mid'? 0.28 : 0.22));
+      const stopWin  = Math.round(bank * (risk==='high'? 0.65 : risk==='mid'? 0.5 : 0.4));
+
+      const tips = [
+        'If two dead batches in a row — pause 60s and lower ladder to Flat.',
+        'On Heat > 70% enable Pulse ladder for next batch only.',
+        'Trigger manual stop‑win, withdraw part, then resume with 60% of bank.',
+        'Don’t chain two bonus buys unless last one returned > 0.8× cost.'
+      ];
+      const tip = tips[Math.floor(rnd()*tips.length)];
+      const fmt = n => n.toLocaleString(undefined,{maximumFractionDigits:0});
+
+      // Render pack
+      $('#signals').innerHTML = `
+        <div class="sig">
+          <h3>Spin Plan <span class="badge safe">BANK BUILD</span></h3>
+          <p><b>Batch:</b> ${spins} spins · <b>Ladder:</b> ${ladder} · <b>Avg bet:</b> LKR ${fmt(ladderAvg)}</p>
+          <p><b>Target:</b> +LKR ${fmt(targetSpinProfit)} (ROI ${(safeMulti*100|0)}%) · <b>Heat:</b> ${(heat*100|0)}%</p>
+          <p class="small">Dead/Medium/High from note: ${hits.dead}/${hits.mid}/${hits.high}</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="SWEET SPINS — ${spins} spins, ladder ${ladder}, avg LKR ${ladderAvg}, target +${targetSpinProfit}">Copy</button>
+          </div>
+        </div>
+
+        <div class="sig">
+          <h3>Bonus Planner <span class="badge risk">HUNT</span></h3>
+          <p><b>Status:</b> ${buy==='off' ? 'Disabled' : ('Buy '+buy+'× bet')} ${bonusEvery? '· every '+bonusEvery+' batch(es)':''}</p>
+          <p><b>Expected swing:</b> ±LKR ${fmt(Math.round(base*(buy==='off'?0:parseInt(buy,10))* (0.6 + heat)))} · <b>Target bonus profit:</b> LKR ${fmt(targetBonusProfit)}</p>
+          <p class="small">Only buy on Heat ≥ 55% or after mid‑win tumble chain.</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="SWEET BONUS — ${buy==='off'?'OFF':('BUY '+buy+'×, cadence '+bonusEvery+' batch(es)')}, target +${targetBonusProfit}">Copy</button>
+          </div>
+        </div>
+
+        <div class="sig">
+          <h3>Coach Rules <span class="badge coach">DISCIPLINE</span></h3>
+          <p><b>Stop‑loss:</b> −LKR ${fmt(stopLoss)} · <b>Stop‑win:</b> +LKR ${fmt(stopWin)}</p>
+          <p>On dead batch: reduce bet by 20% next batch. On high‑win: freeze ladder for 1 batch.</p>
+          <p class="small">Tip: ${tip}</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="copy" data-copy="COACH — SL ${stopLoss}, SW ${stopWin}, heat ${(heat*100|0)}%">Copy</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // EVENTS
+    $('#generate').addEventListener('click', ()=>{
+      if(!$('#bet').value || !$('#bank').value){ alert('Set base bet and session bank.'); return; }
+      simulateSync();
+    });
+    $('#clear').addEventListener('click', ()=>{
+      $('#bet').value=''; $('#bank').value=''; $('#spins').value='50'; $('#risk').value='mid';
+      $('#buy').value='off'; $('#ladder').value='flat'; $('#notes').value='';
+      $('#syslog').textContent=''; $('#bar').style.width='0%'; $('#heat').style.width='20%';
+      $('#signals').innerHTML = '<div class="small">No plan yet. Fill the form and press <span class="hint">Generate Plan</span>.</div>';
+    });
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.copy'); if(!btn) return;
+      const t = btn.getAttribute('data-copy');
+      navigator.clipboard.writeText(t).then(()=>{ btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy',1200); });
+    });
+  </script>
+</body>
+</html>
